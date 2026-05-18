@@ -26,9 +26,9 @@ MARGE: Final[int]           = 20
 EPAISSEUR_MUR: Final[int]   = 4
 EPAISSEUR_ACTIF: Final[int] = 14
 
-GRILLE_L = FENETRE_L - 2 * MARGE
-GRILLE_H = FENETRE_H - ZONE_TEXTE_H - 2 * MARGE
-CASE_L   = GRILLE_L // i__GRID__MAX_COL__
-CASE_H   = GRILLE_H // i__GRID__MAX_ROW__
+GRILLE_L: Final[int]  = FENETRE_L - 2 * MARGE
+GRILLE_H: Final[int]  = FENETRE_H - ZONE_TEXTE_H - 2 * MARGE
+CASE_L: Final[int]    = GRILLE_L // i__GRID__MAX_COL__
+CASE_H: Final[int]    = GRILLE_H // i__GRID__MAX_ROW__
 
 DBG_IS_ON: Final[bool] = False
