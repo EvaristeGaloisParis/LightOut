@@ -11,7 +11,11 @@
       "Bash(python -c ' *)",
       "Bash(python -m unittest discover tests -v)",
       "Bash(python -m unittest discover tests)",
-      "Bash(python -c \"import coverage; print\\(coverage.__version__\\)\")"
+      "Bash(python -c \"import coverage; print\\(coverage.__version__\\)\")",
+      "Bash(python -m coverage run --source=. --omit=\"tests/*,main.py,game_renderer.py\" -m unittest discover tests)",
+      "Bash(python -m coverage report -m)",
+      "Bash(python -m coverage report -m --include=\"board.py\")",
+      "Bash(python -m coverage report)"
     ]
   }
 }

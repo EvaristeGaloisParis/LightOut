@@ -149,6 +149,17 @@ class TestBoardInjection(unittest.TestCase):
         self.assertEqual(b.level, 1)
         self.assertEqual(b.total_lights, 0)
 
+    def test_coups_level_format_sans_actif(self):
+        b = Board({1: 0})
+        self.assertEqual(b.coups_level, 'move: 0 - light: 0 - time: 00:00')
+
+    def test_coups_format_avec_actif(self):
+        b = Board({1: 0})
+        b.start()
+        self.assertIn('move: 0', b.coups)
+        self.assertIn('light: 0', b.coups)
+        self.assertIn('time:', b.coups)
+
 
 if __name__ == '__main__':
     unittest.main()

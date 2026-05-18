@@ -22,20 +22,33 @@ BLEU_ELECTRIQUE: Final[tuple[int, int, int]] = (30,  80,  255)
 GRIS_TEXTE:      Final[tuple[int, int, int]] = (180, 180, 180)
 GRIS_FOND:       Final[tuple[int, int, int]] = (15,  15,  15 )
 
+COUL_BOUTON_RESET:       Final[tuple[int, int, int]] = (40,  80,  120)
+COUL_BOUTON_RESET_HOVER: Final[tuple[int, int, int]] = (60,  120, 180)
+COUL_BOUTON_QUIT:        Final[tuple[int, int, int]] = (120, 40,  40 )
+COUL_BOUTON_QUIT_HOVER:  Final[tuple[int, int, int]] = (180, 60,  60 )
+
 # ─── Dimensions fenêtre ───────────────────────────────────────────────────────
 
 FENETRE_L:            Final[int] = 520
-FENETRE_H:            Final[int] = 650
 ZONE_TEXTE_H:         Final[int] = 110   # agrandie pour accueillir la 3ème ligne chrono
+ZONE_BOUTONS_H:       Final[int] = 80
 MARGE:                Final[int] = 20
 EPAISSEUR_MUR:        Final[int] = 4
 EPAISSEUR_ACTIF:      Final[int] = 14
 EPAISSEUR_SEPARATEUR: Final[int] = 2
 
 GRILLE_L: Final[int] = FENETRE_L - 2 * MARGE
-GRILLE_H: Final[int] = FENETRE_H - ZONE_TEXTE_H - 2 * MARGE
+GRILLE_H: Final[int] = 500
 CASE_L:   Final[int] = GRILLE_L // GRID_MAX_COL
 CASE_H:   Final[int] = GRILLE_H // GRID_MAX_ROW
+
+FENETRE_H: Final[int] = ZONE_TEXTE_H + MARGE + GRILLE_H + MARGE + ZONE_BOUTONS_H
+
+# ─── Boutons ──────────────────────────────────────────────────────────────────
+
+BOUTON_L:      Final[int] = 140
+BOUTON_H:      Final[int] = 40
+BOUTON_ESPACE: Final[int] = 20
 
 # ─── Tailles de fontes ────────────────────────────────────────────────────────
 
@@ -43,6 +56,7 @@ FONTE_TITRE_TAILLE:  Final[int] = 22
 FONTE_INFO_TAILLE:   Final[int] = 16
 FONTE_PETITE_TAILLE: Final[int] = 14
 FONTE_BRAVO_TAILLE:  Final[int] = 48
+FONTE_BOUTON_TAILLE: Final[int] = 18
 
 # ─── Zone texte (mode jeu) ────────────────────────────────────────────────────
 

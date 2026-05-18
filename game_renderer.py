@@ -7,6 +7,7 @@ from constantes import (
     FENETRE_L,
     FENETRE_H,
     ZONE_TEXTE_H,
+    ZONE_BOUTONS_H,
     MARGE,
     EPAISSEUR_MUR,
     EPAISSEUR_ACTIF,
@@ -21,10 +22,18 @@ from constantes import (
     BLEU_ELECTRIQUE,
     GRIS_TEXTE,
     GRIS_FOND,
+    COUL_BOUTON_RESET,
+    COUL_BOUTON_RESET_HOVER,
+    COUL_BOUTON_QUIT,
+    COUL_BOUTON_QUIT_HOVER,
+    BOUTON_L,
+    BOUTON_H,
+    BOUTON_ESPACE,
     FONTE_TITRE_TAILLE,
     FONTE_INFO_TAILLE,
     FONTE_PETITE_TAILLE,
     FONTE_BRAVO_TAILLE,
+    FONTE_BOUTON_TAILLE,
     TITRE_Y,
     COUPS_Y,
     CLEVEL_Y,
@@ -54,6 +63,7 @@ class GameRenderer:
         self.fonte_info   = pygame.font.SysFont('monospace', FONTE_INFO_TAILLE)
         self.fonte_bravo  = pygame.font.SysFont('monospace', FONTE_BRAVO_TAILLE, bold=True)
         self.fonte_petite = pygame.font.SysFont('monospace', FONTE_PETITE_TAILLE)
+        self.fonte_bouton = pygame.font.SysFont('monospace', FONTE_BOUTON_TAILLE, bold=True)
 
         self.active_row: int = 0
         self.active_col: int = 0
@@ -69,6 +79,16 @@ class GameRenderer:
         x = MARGE + col * CASE_L
         y = ZONE_TEXTE_H + MARGE + row * CASE_H
         return pygame.Rect(x, y, CASE_L, CASE_H)
+
+    def _rect_bouton_reset(self) -> pygame.Rect:
+        zone_top = ZONE_TEXTE_H + MARGE + GRILLE_H + MARGE
+        y        = zone_top + (ZONE_BOUTONS_H - BOUTON_H) // 2
+        x        = (FENETRE_L - (2 * BOUTON_L + BOUTON_ESPACE)) // 2
+        return pygame.Rect(x, y, BOUTON_L, BOUTON_H)
+
+    def _rect_bouton_quit(self) -> pygame.Rect:
+        reset = self._rect_bouton_reset()
+        return pygame.Rect(reset.right + BOUTON_ESPACE, reset.y, BOUTON_L, BOUTON_H)
 
     # ─── Rendu : zone texte + grille (mode jeu) ───────────────────────────────
 
@@ -104,6 +124,28 @@ class GameRenderer:
         for col in range(GRID_MAX_COL + 1):
             x = MARGE + col * CASE_L
             pygame.draw.line(self.fenetre, BLANC, (x, ZONE_TEXTE_H + MARGE), (x, ZONE_TEXTE_H + MARGE + GRILLE_H), EPAISSEUR_MUR)
+
+    # ─── Rendu : boutons ──────────────────────────────────────────────────────
+
+    def _draw_bouton(self, rect: pygame.Rect, label: str,
+                     fond: tuple[int, int, int],
+                     fond_hover: tuple[int, int, int],
+                     mouse_pos: tuple[int, int]) -> None:
+        couleur = fond_hover if rect.collidepoint(mouse_pos) else fond
+        pygame.draw.rect(self.fenetre, couleur, rect)
+        pygame.draw.rect(self.fenetre, BLANC, rect, EPAISSEUR_SEPARATEUR)
+        txt = self.fonte_bouton.render(label, True, BLANC)
+        self.fenetre.blit(
+            txt,
+            (rect.centerx - txt.get_width() // 2, rect.centery - txt.get_height() // 2),
+        )
+
+    def _draw_zone_boutons(self) -> None:
+        mouse_pos = pygame.mouse.get_pos()
+        self._draw_bouton(self._rect_bouton_reset(), 'RESET',
+                          COUL_BOUTON_RESET, COUL_BOUTON_RESET_HOVER, mouse_pos)
+        self._draw_bouton(self._rect_bouton_quit(), 'QUITTER',
+                          COUL_BOUTON_QUIT, COUL_BOUTON_QUIT_HOVER, mouse_pos)
 
     # ─── Rendu : écran victoire ───────────────────────────────────────────────
 
@@ -155,6 +197,17 @@ class GameRenderer:
                 y += LIGNE_PETITE_H
 
     # ─── Input ────────────────────────────────────────────────────────────────
+
+    def _handle_mouse(self, event: pygame.event.Event) -> None:
+        if self.board.is_won:
+            return
+        if event.button != 1:
+            return
+        if self._rect_bouton_reset().collidepoint(event.pos):
+            self.board.reset_level()
+        elif self._rect_bouton_quit().collidepoint(event.pos):
+            pygame.quit()
+            sys.exit()
 
     def _handle_keys(self, event: pygame.event.Event) -> None:
         if self.board.is_won:
@@ -219,6 +272,8 @@ class GameRenderer:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     self._handle_keys(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self._handle_mouse(event)
 
             self.fenetre.fill(NOIR)
             if self.board.is_won:
@@ -226,5 +281,6 @@ class GameRenderer:
             else:
                 self._draw_zone_texte()
                 self._draw_grille()
+                self._draw_zone_boutons()
             pygame.display.flip()
             self.horloge.tick(60)
