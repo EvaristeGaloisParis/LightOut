@@ -10,7 +10,8 @@
       "Bash(python -c \"from board import Board; from game_renderer import GameRenderer; from scores import Scores, Score; print\\('import OK'\\)\")",
       "Bash(python -c ' *)",
       "Bash(python -m unittest discover tests -v)",
-      "Bash(python -m unittest discover tests)"
+      "Bash(python -m unittest discover tests)",
+      "Bash(python -c \"import coverage; print\\(coverage.__version__\\)\")"
     ]
   }
 }

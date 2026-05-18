@@ -19,19 +19,21 @@ def fmt_time(ms: int) -> str:
 
 class Board:
 
-    @staticmethod
-    def __loads_maps() -> dict[int, int]:
-        with open([MAPS_FILE, MAPS_FILE_DBG][DBG_IS_ON], mode="r") as f:
-            values: dict[int, int] = json.load(f)
-        return {int(x): y for x, y in values.items()}
-
-    def __init__(self):
-        self.__maps:        dict[int, int] = Board.__loads_maps()
+    def __init__(self, maps: dict[int, int]):
+        self.__maps:        dict[int, int] = maps
         self.__active:      Optional[Map]  = None
         self.__total_moves: int            = 0
         self.__total_light: int            = 0
         self.__total_ms:    int            = 0   # cumul temps des levels terminés
         self.__won:         bool           = False
+
+    @classmethod
+    def from_file(cls) -> 'Board':
+        """Charge les maps depuis le fichier par défaut (debug ou prod selon DBG_IS_ON)."""
+        path = [MAPS_FILE, MAPS_FILE_DBG][DBG_IS_ON]
+        with open(path, mode="r") as f:
+            raw: dict[str, int] = json.load(f)
+        return cls({int(k): v for k, v in raw.items()})
 
     @property
     def is_won(self) -> bool:
