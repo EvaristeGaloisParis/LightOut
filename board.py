@@ -3,6 +3,7 @@ import json
 
 from constantes import (
     st__MAPS_FILE__,
+    st__MAPS_FILE_DBG__,
     i__GRID__MAX_ROW__,
     i__GRID__MAX_COL__,
     DBG_IS_ON,
@@ -20,7 +21,7 @@ class Board:
 
     @staticmethod
     def __loads_maps() -> dict[int, int]:
-        with open(st__MAPS_FILE__, mode="r") as f:
+        with open([st__MAPS_FILE__, st__MAPS_FILE_DBG__][DBG_IS_ON], mode="r") as f:
             values: dict[int, int] = json.load(f)
         return {int(x): y for x, y in values.items()}
 
@@ -30,16 +31,35 @@ class Board:
         self.__total_moves: int            = 0
         self.__total_light: int            = 0
         self.__total_ms:    int            = 0   # cumul temps des levels terminés
+        self.__won:         bool           = False
+
+    @property
+    def is_won(self) -> bool:
+        return self.__won
+
+    @property
+    def total_moves(self) -> int:
+        return self.__total_moves
+
+    @property
+    def total_lights(self) -> int:
+        return self.__total_light
+
+    @property
+    def total_ms(self) -> int:
+        return self.__total_ms
 
     @property
     def level(self) -> int:
+        if self.__active is None:
+            return 0
         return self.__active.id
 
     @property
     def coups(self) -> str:
-        m   = self.__total_moves + self.__active.moves
-        l   = self.__total_light + self.__active.lighting
-        ms  = self.__total_ms + (self.__active.elapsed_ms if self.__active else 0)
+        m  = self.__total_moves + (self.__active.moves      if self.__active else 0)
+        l  = self.__total_light + (self.__active.lighting   if self.__active else 0)
+        ms = self.__total_ms    + (self.__active.elapsed_ms if self.__active else 0)
         return f'move: {m} - light: {l} - time: {fmt_time(ms)}'
 
     @property
@@ -59,9 +79,21 @@ class Board:
 
     def reset_level(self) -> bool:
         """Remet uniquement la disposition — coups et temps ne sont pas effacés."""
+        if self.__active is None:
+            return False
         return self.push_map(self.__active.id)
 
+    def reset_all(self) -> None:
+        """Repart à zéro : totaux remis et niveau 1 chargé."""
+        self.__total_moves = 0
+        self.__total_light = 0
+        self.__total_ms    = 0
+        self.__won         = False
+        self.push_map(1)
+
     def add_move(self) -> None:
+        if self.__active is None:
+            return
         self.__active.add_coup(move=True, light=False)
 
     def is_on(self, row: int, col: int) -> bool:
@@ -70,6 +102,10 @@ class Board:
         return self.__active.is_on(row, col)
 
     def high_light(self, row: int, col: int) -> None:
+
+        if self.__active is None:
+            return
+
         self.__active.add_coup(move=False, light=True)
         for x in range(max(1, row - 1), 1 + min(i__GRID__MAX_ROW__, row + 1)):
             for y in range(max(1, col - 1), 1 + min(i__GRID__MAX_COL__, col + 1)):
@@ -80,4 +116,6 @@ class Board:
             self.__total_moves += self.__active.moves
             self.__total_light += self.__active.lighting
             self.__total_ms    += self.__active.elapsed_ms  # cumule le temps figé
-            self.push_map(self.__active.id + 1)
+            if not self.push_map(self.__active.id + 1):
+                self.__active = None
+                self.__won    = True
