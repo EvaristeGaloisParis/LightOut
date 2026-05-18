@@ -8,7 +8,9 @@
       "Bash(python -c \"import ast; ast.parse\\(open\\('main.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
       "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['constantes.py','map.py','board.py','game_renderer.py','scores.py','main.py']]; print\\('parse OK'\\)\")",
       "Bash(python -c \"from board import Board; from game_renderer import GameRenderer; from scores import Scores, Score; print\\('import OK'\\)\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(python -m unittest discover tests -v)",
+      "Bash(python -m unittest discover tests)"
     ]
   }
 }

@@ -2,14 +2,15 @@ import sys
 import pygame
 
 from constantes import (
-    i__GRID__MAX_ROW__,
-    i__GRID__MAX_COL__,
+    GRID_MAX_ROW,
+    GRID_MAX_COL,
     FENETRE_L,
     FENETRE_H,
     ZONE_TEXTE_H,
     MARGE,
     EPAISSEUR_MUR,
     EPAISSEUR_ACTIF,
+    EPAISSEUR_SEPARATEUR,
     GRILLE_L,
     GRILLE_H,
     CASE_L,
@@ -19,12 +20,25 @@ from constantes import (
     JAUNE,
     BLEU_ELECTRIQUE,
     GRIS_TEXTE,
+    GRIS_FOND,
+    FONTE_TITRE_TAILLE,
+    FONTE_INFO_TAILLE,
+    FONTE_PETITE_TAILLE,
+    FONTE_BRAVO_TAILLE,
+    TITRE_Y,
+    COUPS_Y,
+    CLEVEL_Y,
+    BRAVO_Y,
+    STATS_Y,
+    LIGNE_INFO_H,
+    LIGNE_PETITE_H,
+    APRES_INVITE_H,
+    GAP_PETIT,
+    GAP_MOYEN,
+    LONGUEUR_NOM_MAX,
 )
 from board import Board, fmt_time
 from scores import Score, Scores
-
-
-LONGUEUR_NOM_MAX = 16
 
 
 class GameRenderer:
@@ -36,10 +50,10 @@ class GameRenderer:
         self.fenetre     = pygame.display.set_mode((FENETRE_L, FENETRE_H))
         pygame.display.set_caption('Lights ! brain-teaser')
         self.horloge      = pygame.time.Clock()
-        self.fonte_titre  = pygame.font.SysFont('monospace', 22, bold=True)
-        self.fonte_info   = pygame.font.SysFont('monospace', 16)
-        self.fonte_bravo  = pygame.font.SysFont('monospace', 48, bold=True)
-        self.fonte_petite = pygame.font.SysFont('monospace', 14)
+        self.fonte_titre  = pygame.font.SysFont('monospace', FONTE_TITRE_TAILLE, bold=True)
+        self.fonte_info   = pygame.font.SysFont('monospace', FONTE_INFO_TAILLE)
+        self.fonte_bravo  = pygame.font.SysFont('monospace', FONTE_BRAVO_TAILLE, bold=True)
+        self.fonte_petite = pygame.font.SysFont('monospace', FONTE_PETITE_TAILLE)
 
         self.active_row: int = 0
         self.active_col: int = 0
@@ -59,20 +73,20 @@ class GameRenderer:
     # ─── Rendu : zone texte + grille (mode jeu) ───────────────────────────────
 
     def _draw_zone_texte(self) -> None:
-        pygame.draw.rect(self.fenetre, (15, 15, 15), (0, 0, FENETRE_L, ZONE_TEXTE_H))
-        pygame.draw.line(self.fenetre, BLANC, (0, ZONE_TEXTE_H), (FENETRE_L, ZONE_TEXTE_H), 2)
+        pygame.draw.rect(self.fenetre, GRIS_FOND, (0, 0, FENETRE_L, ZONE_TEXTE_H))
+        pygame.draw.line(self.fenetre, BLANC, (0, ZONE_TEXTE_H), (FENETRE_L, ZONE_TEXTE_H), EPAISSEUR_SEPARATEUR)
 
         txt_level  = self.fonte_titre.render(f'LEVEL  {self.board.level}', True, BLANC)
         txt_coups  = self.fonte_info.render(f'total: {self.board.coups}', True, GRIS_TEXTE)
         txt_clevel = self.fonte_info.render(f'level: {self.board.coups_level}', True, GRIS_TEXTE)
 
-        self.fenetre.blit(txt_level,  (MARGE, 10))
-        self.fenetre.blit(txt_coups,  (MARGE, 40))
-        self.fenetre.blit(txt_clevel, (MARGE, 66))
+        self.fenetre.blit(txt_level,  (MARGE, TITRE_Y))
+        self.fenetre.blit(txt_coups,  (MARGE, COUPS_Y))
+        self.fenetre.blit(txt_clevel, (MARGE, CLEVEL_Y))
 
     def _draw_grille(self) -> None:
-        for row in range(i__GRID__MAX_ROW__):
-            for col in range(i__GRID__MAX_COL__):
+        for row in range(GRID_MAX_ROW):
+            for col in range(GRID_MAX_COL):
                 rect = self._case_rect(row, col)
 
                 if self.board.is_on(row, col):
@@ -83,11 +97,11 @@ class GameRenderer:
                 if row == self.active_row and col == self.active_col:
                     pygame.draw.rect(self.fenetre, JAUNE, rect, EPAISSEUR_ACTIF)
 
-        for row in range(i__GRID__MAX_ROW__ + 1):
+        for row in range(GRID_MAX_ROW + 1):
             y = ZONE_TEXTE_H + MARGE + row * CASE_H
             pygame.draw.line(self.fenetre, BLANC, (MARGE, y), (MARGE + GRILLE_L, y), EPAISSEUR_MUR)
 
-        for col in range(i__GRID__MAX_COL__ + 1):
+        for col in range(GRID_MAX_COL + 1):
             x = MARGE + col * CASE_L
             pygame.draw.line(self.fenetre, BLANC, (x, ZONE_TEXTE_H + MARGE), (x, ZONE_TEXTE_H + MARGE + GRILLE_H), EPAISSEUR_MUR)
 
@@ -95,9 +109,9 @@ class GameRenderer:
 
     def _draw_victoire(self) -> None:
         bravo = self.fonte_bravo.render('BRAVO !', True, JAUNE)
-        self.fenetre.blit(bravo, (FENETRE_L // 2 - bravo.get_width() // 2, 30))
+        self.fenetre.blit(bravo, (FENETRE_L // 2 - bravo.get_width() // 2, BRAVO_Y))
 
-        y = 100
+        y = STATS_Y
         for ligne in (
             f'coups   : {self.board.total_moves}',
             f'lumieres: {self.board.total_lights}',
@@ -105,30 +119,30 @@ class GameRenderer:
         ):
             surf = self.fonte_info.render(ligne, True, BLANC)
             self.fenetre.blit(surf, (MARGE, y))
-            y += 22
+            y += LIGNE_INFO_H
 
         # Saisie du nom ou rang confirmé
-        y += 8
+        y += GAP_PETIT
         if not self.__score_sauve:
             invite = self.fonte_info.render('ton nom : ' + self.__nom_saisi + '_', True, BLANC)
             self.fenetre.blit(invite, (MARGE, y))
-            y += 26
+            y += APRES_INVITE_H
             aide = self.fonte_petite.render('[Entree] valider   [Q]/[Echap] quitter', True, GRIS_TEXTE)
             self.fenetre.blit(aide, (MARGE, y))
-            y += 22
+            y += LIGNE_INFO_H
         else:
             rang = self.fonte_info.render(f'ton rang : #{self.__rang}', True, JAUNE)
             self.fenetre.blit(rang, (MARGE, y))
-            y += 26
+            y += APRES_INVITE_H
             aide = self.fonte_petite.render('[R] rejouer (peux-tu faire mieux ?)   [Q]/[Echap] quitter', True, GRIS_TEXTE)
             self.fenetre.blit(aide, (MARGE, y))
-            y += 22
+            y += LIGNE_INFO_H
 
         # Top 5
-        y += 10
+        y += GAP_MOYEN
         titre = self.fonte_info.render('TOP 5', True, BLANC)
         self.fenetre.blit(titre, (MARGE, y))
-        y += 22
+        y += LIGNE_INFO_H
         top = self.scores.top(5)
         if not top:
             vide = self.fonte_petite.render('(aucun score enregistre)', True, GRIS_TEXTE)
@@ -138,7 +152,7 @@ class GameRenderer:
                 ligne = f'{i}. {s.nom:<{LONGUEUR_NOM_MAX}}  coups:{s.moves:>4}  temps:{fmt_time(s.time_ms)}  {s.date[:10]}'
                 surf  = self.fonte_petite.render(ligne, True, GRIS_TEXTE)
                 self.fenetre.blit(surf, (MARGE, y))
-                y += 20
+                y += LIGNE_PETITE_H
 
     # ─── Input ────────────────────────────────────────────────────────────────
 
@@ -152,16 +166,16 @@ class GameRenderer:
             self.active_col = max(0, self.active_col - 1)
             move = 1
         elif event.key == pygame.K_RIGHT:
-            self.active_col = min(i__GRID__MAX_COL__ - 1, self.active_col + 1)
+            self.active_col = min(GRID_MAX_COL - 1, self.active_col + 1)
             move = 1
         elif event.key == pygame.K_UP:
             self.active_row = max(0, self.active_row - 1)
             move = 1
         elif event.key == pygame.K_DOWN:
-            self.active_row = min(i__GRID__MAX_ROW__ - 1, self.active_row + 1)
+            self.active_row = min(GRID_MAX_ROW - 1, self.active_row + 1)
             move = 1
         elif event.key == pygame.K_SPACE:
-            self.board.high_light(self.active_row + 1, self.active_col + 1)
+            self.board.high_light(self.active_row, self.active_col)
 
         if move:
             self.board.add_move()

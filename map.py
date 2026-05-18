@@ -1,14 +1,14 @@
 import pygame
 
-from constantes import i__GRID__MAX_COL__, i__GRID__MAX_ID__, i__READER__
+from constantes import GRID_MAX_COL, GRID_MAX_ID, READER
 
 
 class Map:
 
     def __init__(self, idx: int, initial_value: int):
-        self.__idx: int           = idx
-        self.__initial_value: int = initial_value & i__READER__
-        self.__current_value: int = initial_value & i__READER__
+        self.__level_id: int      = idx
+        self.__initial_value: int = initial_value & READER
+        self.__current_value: int = initial_value & READER
         self.__lighting: int      = 0
         self.__moves: int         = 0
         self.__start_ticks: int   = pygame.time.get_ticks()  # démarrage chrono level
@@ -28,8 +28,8 @@ class Map:
             self.__finished   = True
 
     @property
-    def id(self) -> int:
-        return self.__idx
+    def level_id(self) -> int:
+        return self.__level_id
 
     @property
     def moves(self) -> int:
@@ -47,13 +47,13 @@ class Map:
         return pygame.time.get_ticks() - self.__start_ticks
 
     def is_on(self, row: int, col: int) -> bool:
-        position = row * i__GRID__MAX_COL__ + col
-        mask     = 1 << (i__GRID__MAX_ID__ - 1 - position)
+        position = row * GRID_MAX_COL + col
+        mask     = 1 << (GRID_MAX_ID - 1 - position)
         return bool(self.__current_value & mask)
 
-    def change(self, x: int, y: int) -> None:
-        position = x * i__GRID__MAX_COL__ + y
-        mask     = 1 << (i__GRID__MAX_ID__ - 1 - position)
+    def change(self, row: int, col: int) -> None:
+        position = row * GRID_MAX_COL + col
+        mask     = 1 << (GRID_MAX_ID - 1 - position)
         self.__current_value ^= mask
 
     def is_finish(self) -> bool:
