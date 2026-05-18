@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude --version)",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['constantes.py','map.py','board.py','game_renderer.py','clMap.py']]; print\\('OK'\\)\")",
+      "Bash(python -c \"from board import Board; from game_renderer import GameRenderer; print\\('imports OK'\\)\")",
+      "Bash(git mv *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('main.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
+    ]
+  }
+}
